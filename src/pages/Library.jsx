@@ -1,48 +1,177 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Library() {
-  const books =
-    JSON.parse(localStorage.getItem("library")) || [];
+    const [search, setSearch] =
+        useState("");
 
-  return (
-    <main className="page library-page">
-      <section className="library-container">
+    const [books, setBooks] = useState(
+        JSON.parse(localStorage.getItem("library")) || []
+    );
 
-        <h1>Minha Biblioteca</h1>
+    function toggleFavorite(id) {
 
-        <Link to="/reader" className="secondary-button">
-          Voltar ao Leitor
-        </Link>
+        const updatedBooks =
+            books.map(book => {
 
-        <div className="library-grid">
+                if (book.id === id) {
+                    return {
+                        ...book,
+                        favorite: !book.favorite
+                    };
+                }
 
-          {books.length === 0 ? (
-            <p>Nenhum PDF salvo.</p>
-          ) : (
-            books.map((book) => (
-              <div className="book-card" key={book.id}>
+                return book;
+            });
 
-                <h3>{book.name}</h3>
+        localStorage.setItem(
+            "library",
+            JSON.stringify(updatedBooks)
+        );
 
-                <div className="book-card-actions">
-                  <a
-                    href={book.pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Abrir PDF
-                  </a>
+        setBooks(updatedBooks);
+    }
+
+    function deleteBook(id) {
+        const confirmDelete = confirm(
+            "Deseja realmente excluir este livro?"
+        );
+
+        if (!confirmDelete) return;
+
+        const updatedBooks = books.filter(
+            (book) => book.id !== id
+        );
+
+        localStorage.setItem(
+            "library",
+            JSON.stringify(updatedBooks)
+        );
+
+        setBooks(updatedBooks);
+    }
+
+    return (
+        <main className="page library-page">
+            <section className="library-container">
+
+                <h1>Minha Biblioteca</h1>
+
+                <Link
+                    to="/reader"
+                    className="secondary-button"
+                >
+                    Voltar ao Leitor
+                </Link>
+
+                <input
+                    type="text"
+                    placeholder="Pesquisar livro..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+                />
+
+                <div className="library-grid">
+
+                    {books.length === 0 ? (
+                        <p>Nenhum livro salvo.</p>
+                    ) : (
+                        [...books]
+                            .sort(
+                                (a, b) =>
+                                    Number(b.favorite) -
+                                    Number(a.favorite)
+                            )
+                            .filter((book) =>
+                                book.name
+                                    .toLowerCase()
+                                    .includes(
+                                        search.toLowerCase()
+                                    )
+                            )
+                            .map((book) => {
+
+                                const progress =
+                                    Math.round(
+                                        ((book.currentPage + 1)
+                                            / book.totalPages) * 100
+                                    );
+
+                                return (
+                                    <div
+                                        className="book-card"
+                                        key={book.id}
+                                    >
+                                        <div className="book-cover">
+                                            📘
+                                        </div>
+
+                                        <h3>{book.name}</h3>
+
+                                        <p>
+                                            Página atual:
+                                            {book.currentPage + 1}
+                                            /
+                                            {book.totalPages}
+                                        </p>
+
+                                        <p>
+                                            Última leitura:
+                                            {book.lastRead}
+                                        </p>
+
+                                        <p>
+                                            Progresso: {progress}%
+                                        </p>
+
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill"
+                                                style={{
+                                                    width: `${progress}%`
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="book-card-actions">
+
+                                            <Link
+                                                to={`/reader/${book.id}`}
+                                                className="primary-button"
+                                            >
+                                                Ler
+                                            </Link>
+
+                                            <button
+                                                onClick={() =>
+                                                    deleteBook(book.id)
+                                                }
+                                            >
+                                                Excluir
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    toggleFavorite(book.id)
+                                                }
+                                            >
+                                                {book.favorite === true ? "⭐" : "☆"}
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+                                );
+                            })
+                    )}
+
                 </div>
 
-              </div>
-            ))
-          )}
-
-        </div>
-
-      </section>
-    </main>
-  );
+            </section>
+        </main>
+    );
 }
 
 export default Library;
