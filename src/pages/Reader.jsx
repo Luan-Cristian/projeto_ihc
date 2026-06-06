@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 function Reader() {
   const [highContrast, setHighContrast] = useState(false);
   const [fontSize, setFontSize] = useState(18);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfName, setPdfName] = useState("");
+  const [pdfText, setPdfText] = useState("");
 
   function increaseFont() {
     if (fontSize < 28) {
@@ -19,6 +26,56 @@ function Reader() {
 
   function resetFont() {
     setFontSize(18);
+  }
+
+  async function handlePdfUpload(event) {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    setPdfName(file.name);
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    const pdf = await pdfjsLib.getDocument({
+      data: arrayBuffer,
+    }).promise;
+
+    let extractedText = "";
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+
+      const textContent = await page.getTextContent();
+
+      const pageText = textContent.items
+        .map(item => item.str)
+        .join(" ");
+
+      extractedText += pageText + "\n\n";
+    }
+
+    setPdfText(extractedText);
+  }
+
+  function saveToLibrary() {
+    if (!pdfText) return;
+
+    const books =
+      JSON.parse(localStorage.getItem("library")) || [];
+
+    books.push({
+      id: Date.now(),
+      name: pdfName,
+      pdfUrl: pdfText,
+    });
+
+    localStorage.setItem(
+      "library",
+      JSON.stringify(books)
+    );
+
+    alert("PDF salvo!");
   }
 
   return (
@@ -48,26 +105,51 @@ function Reader() {
           <button onClick={resetFont}>Fonte padrão</button>
         </section>
 
-        <article className="reading-box" style={{ fontSize: `${fontSize}px` }}>
-          <h2>Exemplo de conteúdo do PDF</h2>
+        <section className="upload-section">
 
-          <p>
-            Este espaço representa a área de leitura do documento. A proposta do
-            BookAccess é tornar a leitura de arquivos PDF mais acessível para
-            diferentes perfis de usuários.
-          </p>
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handlePdfUpload}
+          />
 
-          <p>
-            Com os recursos de alto contraste e alteração do tamanho da fonte, o
-            usuário pode adaptar a interface de acordo com sua necessidade visual,
-            melhorando a legibilidade e a experiência de uso.
-          </p>
+          <button onClick={saveToLibrary}>
+            Salvar na Biblioteca
+          </button>
 
-          <p>
-            Essa funcionalidade contribui diretamente para os princípios de IHC,
-            pois considera acessibilidade, usabilidade, conforto visual e controle
-            do usuário sobre a interface.
-          </p>
+          <Link to="/library">
+            Biblioteca
+          </Link>
+
+        </section>
+
+        <article
+          className="reading-box"
+          style={{ fontSize: `${fontSize}px` }}
+        >
+
+          {pdfText ? (
+            <>
+              <h2>{pdfName}</h2>
+
+              <div
+                style={{
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.8"
+                }}
+              >
+                {pdfText}
+              </div>
+            </>
+          ) : (
+            <>
+              <h2>Nenhum PDF carregado</h2>
+              <p>
+                Faça upload de um arquivo PDF para iniciar a leitura.
+              </p>
+            </>
+          )}
+
         </article>
       </section>
     </main>

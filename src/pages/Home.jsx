@@ -9,13 +9,19 @@ function Home() {
         <h1>BookAccess</h1>
 
         <p className="subtitle">
-          Leitura acessível de documentos PDF com opções de alto contraste e
-          ajuste do tamanho da fonte.
+          Leitura acessível de documentos PDF com suporte a VLibras,
+          alto contraste e personalização da experiência de leitura.
         </p>
 
-        <Link to="/reader" className="primary-button">
-          Abrir PDF
-        </Link>
+        <div className="home-buttons">
+          <Link to="/reader" className="primary-button">
+            Abrir PDF
+          </Link>
+
+          <Link to="/library" className="secondary-button">
+            Minha Biblioteca
+          </Link>
+        </div>
       </section>
     </main>
   );
