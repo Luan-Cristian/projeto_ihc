@@ -94,6 +94,8 @@ function Library() {
                             .map((book) => {
 
                                 const progress =
+
+
                                     Math.round(
                                         ((book.currentPage + 1)
                                             / book.totalPages) * 100
@@ -125,6 +127,8 @@ function Library() {
                                         <p>
                                             Progresso: {progress}%
                                         </p>
+
+                                        
 
                                         <div className="progress-bar">
                                             <div
