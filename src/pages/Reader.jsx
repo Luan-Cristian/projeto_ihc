@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useParams
+} from "react-router-dom";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
+import Modal from "../components/Modal";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -12,12 +16,29 @@ function Reader() {
   const [fontSize, setFontSize] = useState(18);
   const [pdfName, setPdfName] = useState("");
   const [pdfText, setPdfText] = useState("");
+  const [showSaveModal, setShowSaveModal] =
+    useState(false);
+
+  const [bookName, setBookName] =
+    useState("");
+  const [showModal, setShowModal] =
+    useState(false);
+
+  const [modalTitle, setModalTitle] =
+    useState("");
+
+  const [modalMessage, setModalMessage] =
+    useState("");
+
+
+    
 
   const containerRef = useRef(null);
   const headerRef = useRef(null);
   const panelRef = useRef(null);
   const uploadRef = useRef(null);
   const readingRef = useRef(null);
+  const { id } = useParams();
 
   useEffect(() => {
     const timeline = gsap.timeline();
@@ -134,73 +155,101 @@ function Reader() {
   }
 
   async function handlePdfUpload(event) {
-  try {
-    const file = event.target.files[0];
+    try {
+      const file = event.target.files[0];
 
-    if (!file) {
-      alert("Nenhum arquivo selecionado.");
-      return;
+      if (!file) {
+        alert("Nenhum arquivo selecionado.");
+        return;
+      }
+
+      if (file.type !== "application/pdf") {
+        alert("Selecione um arquivo PDF válido.");
+        return;
+      }
+
+      setPdfName(file.name);
+      setPdfText("Carregando PDF...");
+
+      const arrayBuffer = await file.arrayBuffer();
+
+      const pdf = await pdfjsLib.getDocument({
+        data: arrayBuffer,
+      }).promise;
+
+      let extractedText = "";
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+
+        const pageText = textContent.items
+          .map((item) => item.str)
+          .join(" ");
+
+        extractedText += `Página ${pageNum}\n${pageText}\n\n`;
+      }
+
+      if (!extractedText.trim()) {
+        setPdfText(
+          "Não foi possível extrair texto deste PDF. Ele pode ser uma imagem escaneada."
+        );
+        return;
+      }
+
+      setPdfText(extractedText);
+    } catch (error) {
+      console.error("Erro ao carregar PDF:", error);
+      alert("Erro ao carregar o PDF. Veja o console para mais detalhes.");
+      setPdfText("");
     }
-
-    if (file.type !== "application/pdf") {
-      alert("Selecione um arquivo PDF válido.");
-      return;
-    }
-
-    setPdfName(file.name);
-    setPdfText("Carregando PDF...");
-
-    const arrayBuffer = await file.arrayBuffer();
-
-    const pdf = await pdfjsLib.getDocument({
-      data: arrayBuffer,
-    }).promise;
-
-    let extractedText = "";
-
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const textContent = await page.getTextContent();
-
-      const pageText = textContent.items
-        .map((item) => item.str)
-        .join(" ");
-
-      extractedText += `Página ${pageNum}\n${pageText}\n\n`;
-    }
-
-    if (!extractedText.trim()) {
-      setPdfText(
-        "Não foi possível extrair texto deste PDF. Ele pode ser uma imagem escaneada."
-      );
-      return;
-    }
-
-    setPdfText(extractedText);
-  } catch (error) {
-    console.error("Erro ao carregar PDF:", error);
-    alert("Erro ao carregar o PDF. Veja o console para mais detalhes.");
-    setPdfText("");
   }
-}
 
   function saveToLibrary() {
+
     if (!pdfText) {
-      alert("Carregue um PDF antes de salvar.");
+
+      setModalTitle("Erro");
+
+      setModalMessage(
+        "Carregue um PDF antes de salvar."
+      );
+
+      setShowModal(true);
+
       return;
     }
 
-    const books = JSON.parse(localStorage.getItem("library")) || [];
+    setShowSaveModal(true);
+  }
+
+  function confirmSaveBook() {
+
+    const books =
+      JSON.parse(
+        localStorage.getItem("library")
+      ) || [];
 
     books.push({
       id: Date.now(),
-      name: pdfName,
+      name: bookName,
       pdfUrl: pdfText,
     });
 
-    localStorage.setItem("library", JSON.stringify(books));
+    localStorage.setItem(
+      "library",
+      JSON.stringify(books)
+    );
 
-    alert("PDF salvo na biblioteca!");
+    setShowSaveModal(false);
+
+    setModalTitle("Sucesso");
+
+    setModalMessage(
+      "Livro salvo com sucesso!"
+    );
+
+    setShowModal(true);
   }
 
   return (
@@ -283,6 +332,55 @@ function Reader() {
           )}
         </article>
       </section>
+
+      <Modal
+        isOpen={showModal}
+        title={modalTitle}
+        message={modalMessage}
+        onClose={() => setShowModal(false)}
+      />
+
+      <Modal
+        isOpen={showSaveModal}
+        title="Salvar Livro"
+        onClose={() => setShowSaveModal(false)}
+      >
+
+        <input
+          type="text"
+          placeholder="Nome do livro"
+          value={bookName}
+          onChange={(e) =>
+            setBookName(e.target.value)
+          }
+        />
+
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px"
+          }}
+        >
+          <button
+            className="secondary-button"
+            onClick={() =>
+              setShowSaveModal(false)
+            }
+          >
+            Cancelar
+          </button>
+
+          <button
+            className="primary-button"
+            onClick={confirmSaveBook}
+          >
+            Salvar
+          </button>
+        </div>
+
+      </Modal>
     </main>
   );
 }
