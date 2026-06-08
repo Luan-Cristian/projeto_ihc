@@ -25,13 +25,12 @@ function Library() {
                 <h3>{book.name}</h3>
 
                 <div className="book-card-actions">
-                  <a
-                    href={book.pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    to={`/reader/${book.id}`}
+                    className="primary-button"
                   >
-                    Abrir PDF
-                  </a>
+                    Ler
+                  </Link>
                 </div>
 
               </div>

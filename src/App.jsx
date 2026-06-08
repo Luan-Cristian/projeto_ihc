@@ -35,6 +35,7 @@ function AnimatedRoutes() {
       <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/reader" element={<Reader />} />
+        <Route path="/reader/:id" element={<Reader />} />
         <Route path="/library" element={<Library />} />
       </Routes>
     </div>
