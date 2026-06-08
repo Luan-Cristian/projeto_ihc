@@ -84,7 +84,6 @@ input {
   will-change: transform, opacity;
 }
 
-/* Remove o efeito que estava criando a ponta visual quebrada */
 .glow-circle {
   display: none;
 }
@@ -156,10 +155,6 @@ h1 {
   background: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
-
-/* ===================================
-   NAVBAR
-=================================== */
 
 .navbar {
   position: fixed;
@@ -276,10 +271,6 @@ h1 {
   transform: translateY(-2px) scale(1.015);
 }
 
-/* ===================================
-   NAVBAR EM ALTO CONTRASTE
-=================================== */
-
 .high-contrast .glass-navbar {
   background: rgba(0, 0, 0, 0.95);
   border: 3px solid #ffff00;
@@ -316,9 +307,6 @@ h1 {
   color: #000000;
 }
 
-/* ===================================
-   MOBILE NAVBAR
-=================================== */
 
 @media (max-width: 700px) {
   .navbar {
@@ -352,9 +340,6 @@ h1 {
   }
 }
 
-/* ===================================
-   HOME
-=================================== */
 
 .home-buttons {
   position: relative;
@@ -365,9 +350,7 @@ h1 {
   margin-top: 28px;
 }
 
-/* ===================================
-   READER
-=================================== */
+
 
 .reader-header {
   display: flex;
@@ -427,9 +410,6 @@ h1 {
   margin-bottom: 18px;
 }
 
-/* ===================================
-   UPLOAD PDF
-=================================== */
 
 .upload-section {
   display: flex;
@@ -468,9 +448,7 @@ h1 {
   display: none;
 }
 
-/* ===================================
-   BIBLIOTECA
-=================================== */
+
 
 .library-grid {
   display: grid;
@@ -539,9 +517,6 @@ h1 {
   transform: translateY(-2px);
 }
 
-/* ===================================
-   PDF VIEWER
-=================================== */
 
 .pdf-viewer {
   width: 100%;
@@ -551,9 +526,6 @@ h1 {
   background: white;
 }
 
-/* ===================================
-   ALTO CONTRASTE
-=================================== */
 
 .high-contrast {
   background: #000000;
@@ -636,9 +608,7 @@ h1 {
   border: 2px solid #ffff00;
 }
 
-/* ===================================
-   MOBILE
-=================================== */
+
 
 @media (max-width: 700px) {
   .page {
@@ -712,9 +682,7 @@ h1 {
   }
 }
 
-/* ===================================
-   AJUSTE HEADER DA BIBLIOTECA
-=================================== */
+
 
 .library-container h1 {
   margin-bottom: 36px;
@@ -734,9 +702,6 @@ h1 {
   margin-top: 20px;
 }
 
-/* ===================================
-   TRANSIÇÃO SUAVE ENTRE PÁGINAS
-=================================== */
 
 .page-transition {
   width: 100%;
@@ -744,9 +709,6 @@ h1 {
   will-change: opacity, transform, filter;
 }
 
-/* =========================
-   MODAL
-========================= */
 
 .modal-overlay {
   position: fixed;

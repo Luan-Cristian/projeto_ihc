@@ -31,7 +31,7 @@ function Reader() {
     useState("");
 
 
-    
+
 
   const containerRef = useRef(null);
   const headerRef = useRef(null);
@@ -39,6 +39,27 @@ function Reader() {
   const uploadRef = useRef(null);
   const readingRef = useRef(null);
   const { id } = useParams();
+
+  useEffect(() => {
+
+    if (!id) return;
+
+    const books =
+      JSON.parse(
+        localStorage.getItem("library")
+      ) || [];
+
+    const book =
+      books.find(
+        (b) => b.id === Number(id)
+      );
+
+    if (!book) return;
+
+    setPdfName(book.name);
+    setPdfText(book.pdfUrl);
+
+  }, [id]);
 
   useEffect(() => {
     const timeline = gsap.timeline();
@@ -162,7 +183,7 @@ function Reader() {
         alert("Nenhum arquivo selecionado.");
         return;
       }
-
+      
       if (file.type !== "application/pdf") {
         alert("Selecione um arquivo PDF válido.");
         return;
